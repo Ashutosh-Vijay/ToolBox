@@ -828,6 +828,24 @@ select.input { appearance: none; padding-right: 28px; }
 .update-card .uc-fill { height: 100%; background: var(--accent); border-radius: 20px; transition: width .2s ease; }
 .update-card .uc-actions { display: flex; gap: 8px; margin-top: 11px; justify-content: flex-end; }
 
+/* ============================================================
+   ANALOG CLOCK HERO (World Clock tool)
+   ============================================================ */
+.clock-hero {
+  display: flex; align-items: center; gap: 26px; flex-wrap: wrap;
+  padding: 20px 24px; margin-bottom: 18px;
+  background: radial-gradient(120% 140% at 18% 10%, var(--accent-softer), transparent 60%), var(--bg-2);
+  border: 1px solid var(--border); border-radius: 14px;
+}
+/* override the global `svg { width:16px }` icon reset for full-size art */
+.analog-clock { width: 190px; height: 190px; filter: drop-shadow(0 10px 24px rgba(0,0,0,0.25)); flex: none; }
+.splash-loader svg, .splash-loader canvas { width: 100%; height: 100%; }
+.clock-digital { min-width: 0; }
+.cd-time { font-size: 46px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; font-variant-numeric: tabular-nums; }
+.cd-date { color: var(--text-1); font-size: 15px; margin-top: 8px; }
+.cd-zone { color: var(--text-2); font-size: 12.5px; margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; }
+@media (max-width: 720px) { .clock-hero { justify-content: center; text-align: center; } }
+
 /* generic helpers */
 .row { display: flex; align-items: center; gap: 10px; }
 .col { display: flex; flex-direction: column; }

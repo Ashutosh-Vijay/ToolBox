@@ -1,8 +1,82 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "../Icon";
 import { Btn } from "../ui/Btn";
 import { CopyButton } from "../ui/CopyButton";
 import { ErrorBanner } from "../ui/ErrorBanner";
+
+/* A live analog clock, smoothly swept (sub-second) and synced to the system
+   clock. Colours come from CSS vars so it adapts to light/dark themes. */
+function AnalogClock({ size = 190 }: { size?: number }) {
+  const [t, setT] = useState(() => new Date());
+  const raf = useRef(0);
+  useEffect(() => {
+    const tick = () => {
+      setT(new Date());
+      raf.current = requestAnimationFrame(tick);
+    };
+    raf.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf.current);
+  }, []);
+
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = size * 0.46;
+  const ms = t.getMilliseconds();
+  const s = t.getSeconds() + ms / 1000;
+  const m = t.getMinutes() + s / 60;
+  const h = (t.getHours() % 12) + m / 60;
+  const hourA = h * 30;
+  const minA = m * 6;
+  const secA = s * 6;
+
+  const ticks = Array.from({ length: 60 }).map((_, i) => {
+    const ar = (i * 6 * Math.PI) / 180;
+    const major = i % 5 === 0;
+    const ro = r * 0.97;
+    const ri = r * (major ? 0.84 : 0.91);
+    return (
+      <line
+        key={i}
+        x1={cx + Math.sin(ar) * ro}
+        y1={cy - Math.cos(ar) * ro}
+        x2={cx + Math.sin(ar) * ri}
+        y2={cy - Math.cos(ar) * ri}
+        stroke={major ? "var(--text-1)" : "var(--text-3)"}
+        strokeWidth={major ? 1.6 : 1}
+        strokeLinecap="round"
+      />
+    );
+  });
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="analog-clock">
+      <defs>
+        <radialGradient id="clk-face" cx="50%" cy="38%">
+          <stop offset="0%" stopColor="var(--bg-3)" />
+          <stop offset="100%" stopColor="var(--bg-2)" />
+        </radialGradient>
+        <filter id="clk-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2" />
+        </filter>
+      </defs>
+      <circle cx={cx} cy={cy} r={r} fill="url(#clk-face)" stroke="var(--border-strong)" strokeWidth="1.5" />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--accent-soft)" strokeWidth="1" />
+      {ticks}
+      {/* hour hand */}
+      <line x1={cx} y1={cy + r * 0.06} x2={cx} y2={cy - r * 0.5} stroke="var(--text-0)" strokeWidth="4" strokeLinecap="round" transform={`rotate(${hourA} ${cx} ${cy})`} />
+      {/* minute hand */}
+      <line x1={cx} y1={cy + r * 0.08} x2={cx} y2={cy - r * 0.74} stroke="var(--text-0)" strokeWidth="2.6" strokeLinecap="round" transform={`rotate(${minA} ${cx} ${cy})`} />
+      {/* second hand */}
+      <g transform={`rotate(${secA} ${cx} ${cy})`}>
+        <line x1={cx} y1={cy + r * 0.18} x2={cx} y2={cy - r * 0.82} stroke="var(--accent)" strokeWidth="1.3" strokeLinecap="round" filter="url(#clk-glow)" />
+        <line x1={cx} y1={cy + r * 0.18} x2={cx} y2={cy - r * 0.82} stroke="var(--accent)" strokeWidth="1.3" strokeLinecap="round" />
+        <circle cx={cx} cy={cy - r * 0.82} r="2.6" fill="var(--accent)" />
+      </g>
+      <circle cx={cx} cy={cy} r="5.5" fill="var(--bg-1)" stroke="var(--accent)" strokeWidth="2" />
+      <circle cx={cx} cy={cy} r="1.6" fill="var(--accent)" />
+    </svg>
+  );
+}
 
 const ZONES: { label: string; sub: string; tz?: string; color: string }[] = [
   { label: "Local", sub: "your system clock", tz: undefined, color: "#2fe6d2" },
@@ -76,6 +150,11 @@ export function TimeTool() {
     return { d };
   }, [input]);
 
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const localTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const localDate = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "2-digit", month: "long", year: "numeric" }).format(now);
+  const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   return (
     <div className="tool-fade">
       <div className="ws-toolbar">
@@ -83,6 +162,15 @@ export function TimeTool() {
         <span className="spacer" />
         <CopyButton text={String(Math.floor(now.getTime() / 1000))} onDone="Copied epoch" />
         <span className="faint" style={{ fontSize: 12 }}>copy epoch</span>
+      </div>
+
+      <div className="clock-hero">
+        <AnalogClock size={190} />
+        <div className="clock-digital">
+          <div className="cd-time mono">{localTime}</div>
+          <div className="cd-date">{localDate}</div>
+          <div className="cd-zone"><Icon name="globe" style={{ width: 13, height: 13 }} />{tzName} · local system time</div>
+        </div>
       </div>
 
       <div style={{ marginBottom: 22 }}>
