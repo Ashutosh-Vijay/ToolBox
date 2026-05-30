@@ -1,0 +1,22 @@
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# Editor / OS
+.DS_Store
+.vscode/
+*.log
+
+# Design bundles (reference only, not part of the app)
+design
+design.gz
+loader
+loader.gz
+*.bin
+_design/
+_loader/

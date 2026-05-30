@@ -1,0 +1,8 @@
+/* Design system (source of truth for the look) loads first, then Tailwind
+   utilities sit on top for occasional one-off tweaks. Tailwind preflight is
+   disabled (see tailwind.config.js) so it never fights the design reset. */
+@import "./styles.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
