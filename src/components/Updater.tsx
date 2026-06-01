@@ -47,7 +47,7 @@ export function Updater() {
         }
       } catch {
         // offline / blocked / no release yet — stay silent on auto, notify on manual
-        if (manual) toast("Couldn't reach the update server", "err");
+        if (manual) toast("Couldn't reach GitHub — check your network or download from the Releases page", "err");
       } finally {
         checking.current = false;
       }
