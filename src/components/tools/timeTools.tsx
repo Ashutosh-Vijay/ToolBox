@@ -135,9 +135,17 @@ export function TimeTool() {
   const [now, setNow] = useState(() => new Date());
   const [input, setInput] = useState("");
 
+  // Update on the actual second boundary (not a drifting 1000ms interval) so the
+  // digital readout never lags a second behind the real-time analog sweep.
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
+    let id: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      const d = new Date();
+      setNow(d);
+      id = setTimeout(tick, 1000 - d.getMilliseconds());
+    };
+    tick();
+    return () => clearTimeout(id);
   }, []);
 
   const parsed = useMemo<{ d: Date } | { err: string } | null>(() => {

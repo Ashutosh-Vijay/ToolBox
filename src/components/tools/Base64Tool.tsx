@@ -91,9 +91,10 @@ export function Base64Tool() {
     setFile(null);
   };
 
+  // Toggling direction keeps the uploaded file: the file card only renders in
+  // encode mode (decode reads `input`), so it's safe to preserve and restore.
   const changeDir = (v: "encode" | "decode") => {
     setDir(v);
-    setFile(null);
   };
 
   const swap = () => {

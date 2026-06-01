@@ -40,7 +40,17 @@ export function FileDropZone({
         <span>{hint}</span>
       </div>
       <span className="dz-pick btn sm">Browse</span>
-      <input ref={inputRef} type="file" hidden onChange={(e) => handle(e.target.files)} />
+      {/* reset value after each pick so selecting the *same* file again still
+          fires onChange (otherwise re-uploading the same file does nothing). */}
+      <input
+        ref={inputRef}
+        type="file"
+        hidden
+        onChange={(e) => {
+          handle(e.target.files);
+          e.target.value = "";
+        }}
+      />
     </div>
   );
 }
